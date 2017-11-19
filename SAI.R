@@ -1,7 +1,7 @@
 # Sets working dir (mac)
 setwd("/Users/cskoven/Google Drive/PhD/DRCMR/Lab/LabNotes/PreClinLabs/SAI_data")
-identifier <- "20170907"
-suffix <- "_csv_hhmmss2"
+identifier <- "20170906"
+suffix <- "_h"
 setwd(identifier)
 
 #READ -> txt-file
@@ -24,6 +24,8 @@ mydata <- read.csv(paste(identifier, suffix, ".csv", sep=""), header = TRUE, sep
 mydata <- subset(mydata, select = c("Time", "Resp.Rate", "ECG.Rate", "Temp.1"))
 colnames(mydata) <- c("Time", "Resp", "ECG", "Temp")
 
+mydata$Time[1]
+
 #figure out what happens here: https://stackoverflow.com/questions/30359427/calculate-the-mean-of-every-13-rows-in-data-frame-in-r
 n <- 60
 mydata <- aggregate(mydata,list(rep(1:(nrow(mydata)%/%n+1),each=n,len=nrow(mydata))),mean)[-1];
@@ -40,7 +42,7 @@ mydata_hr_filtered <- mydata_hr
 
 #mydata_hr_filtered$Resp[mydata_hr$Resp<0 | mydata_hr$Resp>150] <- NA
 #mydata_hr_filtered$ECG[mydata_hr$ECG<50 | mydata_hr$ECG>450] <- NA
-mydata_hr_filtered$Temp[mydata_hr$Temp<30 | mydata_hr$Temp>45] <- NA
+#mydata_hr_filtered$Temp[mydata_hr$Temp<30 | mydata_hr$Temp>45] <- NA
 
 
 mydata_hr_filtered_long <- melt(mydata_hr_filtered, id.vars=c("Time"))
@@ -74,14 +76,14 @@ mydata_hr_filtered_long <- melt(mydata_hr_filtered, id.vars=c("Time"))
 
 #isoflurane <- ()
 
-rect_center <- c(0.5,1.5,1.9,3.7)
+#rect_center <- c(0.5,1.5,1.9,3.7)
 #events <- c()
-rectangles <- data.frame(
-  xmin = rect_center - 0.1,
-  xmax = rect_center + 0.1,
-  ymin = 0,
-  ymax = Inf
-)
+#rectangles <- data.frame(
+ # xmin = rect_center - 0.1,
+#  xmax = rect_center + 0.1,
+#  ymin = 0,
+#  ymax = Inf
+#)
 
 plot <- ggplot(mydata_hr_filtered_long, aes(x=Time, y=value)) + facet_grid(variable ~ ., scales="free_y") +
   scale_x_continuous(breaks=seq(0,50,1)) +
