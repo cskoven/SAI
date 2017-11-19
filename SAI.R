@@ -1,15 +1,20 @@
 # Sets working dir (mac)
 setwd("/Users/cskoven/Google Drive/PhD/DRCMR/Lab/LabNotes/PreClinLabs/SAI_data")
-identifier <- "20170907"
-lab_date <- "2017-09-07"
-suffix <- "_hhmmss"
+identifier <- "20171025"
+lab_date <- "2017-10-25"
+suffix <- "" #"_hhmmss"
 setwd(identifier)
 
 #READ -> txt-file
 my_txt <- readLines(paste(identifier, suffix, ".txt", sep=""))
+header <- my_txt[1] #readLines(paste(identifier, suffix, ".txt", sep=""), n=1)
+my_txt <- my_txt[-1]
+#remove nonsense-hdr (in this case, line 1,2 and 4)
+#my_csv_txt_nonons <- my_csv_txt[-c(1,2,4)] 
 
 #make csv-readble
 #my_csv_txt  <- gsub(pattern = ", ", replace = ";", x = mytxt)
+my_txt  <- gsub(pattern = "-1", replace = "", x = my_txt)
 my_csv_txt  <- gsub(pattern = ",", replace = ".", x = my_txt)
 
 #write content into csv_file
@@ -74,69 +79,23 @@ meandf_filtered_long$Time <- as.POSIXct(meandf_filtered_long$Time, format="%Y-%m
 
 alldata_verylong <- rbind(meandf_filtered_long, anaest_iso_long, anaest_dex_long)
 
+r <- as.POSIXct(round(range(alldata_verylong$Time), "hours"))
 
 ### plot
 plot <- ggplot(alldata_verylong, aes(x=Time, y=value)) + facet_grid(variable ~ ., scales="free_y") +
-
   geom_line() + theme_bw() + ylab("") + 
   ggtitle(paste(lab_date)) +
   geom_vline(data=events, aes(xintercept=as.numeric(as.POSIXct(Time))), colour="red", size=.2) +
-  labs(caption=paste(apply(events[,c("Label", "Event")], 1, paste, collapse =": "), collapse="\n")) +
+  labs(caption=paste(apply(cbind(format(events$Time, "%H:%M"), paste(events$Event)), 1, paste, collapse =": "), collapse="\n"))+
+  #axis.POSIXct(1, at = seq(r[1], r[2], by = "hour"), format = "%H") + 
   theme(
+    legend.text=element_text(size=16),
     plot.title=element_text(size=16, face="bold"),
     legend.position="none", legend.box="horizontal",
     legend.direction="horizontal",
     axis.text = element_text(size=16),
     axis.title=element_text(size=16, face="bold"),
-    legend.text=element_text(size=16),
     legend.title=element_text(size=16, face="bold"),
     plot.caption=element_text(hjust=0.0, vjust=0.5)
   )
 plot
-
-#event_table <- ggplot(events,  aes(x=Time), y=factor(Label))
-#event_table
-
-#library(grid)
-
-# for (i in 1:length(events$Event))  {
-#   plot <- plot + annotation_custom(
-#     grob = textGrob(label = events$Label[i], hjust = 0, gp = gpar(cex = 1.5)),
-#     ymin = -2,      # Vertical position of the textGrob
-#     ymax = -2,
-#     xmin = as.POSIXct(events$Time[i]),         # Note: The grobs are positioned outside the plot area
-#     xmax = as.POSIXct(events$Time[i]))
-# }    
-# 
-# plot <- plot + annotation_custom(
-#   grob = textGrob(label = events$Label[1], hjust = 0, gp = gpar(cex = 1.0)),
-#   ymin = -2,      # Vertical position of the textGrob
-#   ymax = -2,
-#   xmin = as.numeric(as.POSIXct(events$Time[1])),         # Note: The grobs are positioned outside the plot area
-#   xmax = as.numeric(as.POSIXct(events$Time[1])))
-# plot
-# 
-# gt <- ggplot_gtable(ggplot_build(plot))
-# gt$layout$clip[gt$layout$name == "panel"] <- "off"
-# grid.newpage()
-# grid.draw(gt)
-# # 
-# 
-# library(dplyr)    
-# ymin <- alldata_verylong %>% 
-#   group_by(variable) %>% 
-#   slice(which.min(value))
-# 
-# alldata_verylong[which.min(alldata_verylong$value), by = alldata_verylong$variable]
-# 
-# alldata_verylong[ , .SD[which.min(alldata_verylong$value)], by = alldata_verylong$variable]
-# 
-# 
-# label.pos <- alldata_verylong[,ypos:=min(alldata_verylong$value),by=alldata_verylong$variable]
-
-
-# scale_x_datetime(
-#   breaks = seq(as.POSIXct("2017-09-07 08:57:00 CEST"),
-#               as.POSIXct("2017-09-07 12:57:00 CEST"), "1 hour"),
-#   labels = c("0",1,2,3,4)
-#)+
